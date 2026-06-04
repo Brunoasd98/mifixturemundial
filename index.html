@@ -710,13 +710,13 @@ function renderGrupo(grupo){
     let textoAdicional = '';
     if(i===0 || i===1){
       clase = 'qualified';
-      textoAdicional = ' ✅ CLASIFICA';
+      textoAdicional = ' ✅';
     } else if(i===2){
-      if(!gruposCompletos) textoAdicional = ' ⏳ Pendiente';
+      if(!gruposCompletos) textoAdicional = ' ⏳';
       else if(esTerceroClasificado(s.eq)){
         clase = 'third-qualified';
-        textoAdicional = ' ✅ PUEDE SER 3°';
-      } else textoAdicional = ' ❌ ELIMINADO';
+        textoAdicional = ' ✅ 3°';
+      } else textoAdicional = ' ❌';
     }
     const gdTexto = s.gd > 0 ? `+${s.gd}` : `${s.gd}`;
     tablaHtml += `<tr class="${clase}" onclick="verPlantel('${s.eq}')"><td><div style="display:flex;align-items:center;gap:6px">${flagImg(s.eq,24,18)}<span>${s.eq}</span>${textoAdicional}</div></td>
