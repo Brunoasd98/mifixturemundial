@@ -497,22 +497,22 @@ function getSegundo(grupo){
 // ==================== GENERAR RONDA DE 32 ====================
 function generarRonda32(){
   const partidosBase = [
-    {id:'r32_73',f:'Domingo 28/6',h:'',localGrupo:'A',localPos:2,visitanteGrupo:'B',visitantePos:2,visitanteEsTercero:false,e:'Estadio Los Ángeles'},
-    {id:'r32_74',f:'Lunes 29/6',h:'',localGrupo:'E',localPos:1,visitanteGrupo:'D',visitantePos:3,visitanteEsTercero:true,e:'Estadio Boston'},
-    {id:'r32_75',f:'Lunes 29/6',h:'',localGrupo:'F',localPos:1,visitanteGrupo:'C',visitantePos:2,visitanteEsTercero:false,e:'Estadio Monterrey'},
-    {id:'r32_76',f:'Lunes 29/6',h:'',localGrupo:'C',localPos:1,visitanteGrupo:'F',visitantePos:2,visitanteEsTercero:false,e:'Estadio Houston'},
-    {id:'r32_77',f:'Martes 30/6',h:'',localGrupo:'I',localPos:1,visitanteGrupo:'G',visitantePos:3,visitanteEsTercero:true,e:'Estadio Nueva York Nueva Jersey'},
-    {id:'r32_78',f:'Martes 30/6',h:'',localGrupo:'E',localPos:2,visitanteGrupo:'I',visitantePos:2,visitanteEsTercero:false,e:'Estadio Dallas'},
-    {id:'r32_79',f:'Martes 30/6',h:'',localGrupo:'A',localPos:1,visitanteGrupo:'C',visitantePos:3,visitanteEsTercero:true,e:'Estadio Ciudad de México'},
-    {id:'r32_80',f:'Miércoles 1/7',h:'',localGrupo:'L',localPos:1,visitanteGrupo:'H',visitantePos:3,visitanteEsTercero:true,e:'Estadio Atlanta'},
-    {id:'r32_81',f:'Miércoles 1/7',h:'',localGrupo:'D',localPos:1,visitanteGrupo:'B',visitantePos:3,visitanteEsTercero:true,e:'Estadio Bahía de San Francisco'},
-    {id:'r32_82',f:'Miércoles 1/7',h:'',localGrupo:'G',localPos:1,visitanteGrupo:'A',visitantePos:3,visitanteEsTercero:true,e:'Estadio Seattle'},
-    {id:'r32_83',f:'Jueves 2/7',h:'',localGrupo:'K',localPos:2,visitanteGrupo:'L',visitantePos:2,visitanteEsTercero:false,e:'Estadio Toronto'},
-    {id:'r32_84',f:'Jueves 2/7',h:'',localGrupo:'H',localPos:1,visitanteGrupo:'J',visitantePos:2,visitanteEsTercero:false,e:'Estadio Los Ángeles'},
-    {id:'r32_85',f:'Jueves 2/7',h:'',localGrupo:'B',localPos:1,visitanteGrupo:'E',visitantePos:3,visitanteEsTercero:true,e:'BC Place Vancouver'},
-    {id:'r32_86',f:'Viernes 3/7',h:'',localGrupo:'J',localPos:1,visitanteGrupo:'H',visitantePos:2,visitanteEsTercero:false,e:'Estadio Miami'},
-    {id:'r32_87',f:'Viernes 3/7',h:'',localGrupo:'K',localPos:1,visitanteGrupo:'L',visitantePos:3,visitanteEsTercero:true,e:'Estadio Kansas City'},
-    {id:'r32_88',f:'Viernes 3/7',h:'',localGrupo:'D',localPos:2,visitanteGrupo:'G',visitantePos:2,visitanteEsTercero:false,e:'Estadio Dallas'}
+    {id:'r32_73',f:'Domingo 28/6',localGrupo:'A',localPos:2,visitanteGrupo:'B',visitantePos:2,visitanteEsTercero:false,e:'Estadio Los Ángeles'},
+    {id:'r32_74',f:'Lunes 29/6',localGrupo:'E',localPos:1,visitanteGrupo:'D',visitantePos:3,visitanteEsTercero:true,e:'Estadio Boston'},
+    {id:'r32_75',f:'Lunes 29/6',localGrupo:'F',localPos:1,visitanteGrupo:'C',visitantePos:2,visitanteEsTercero:false,e:'Estadio Monterrey'},
+    {id:'r32_76',f:'Lunes 29/6',localGrupo:'C',localPos:1,visitanteGrupo:'F',visitantePos:2,visitanteEsTercero:false,e:'Estadio Houston'},
+    {id:'r32_77',f:'Martes 30/6',localGrupo:'I',localPos:1,visitanteGrupo:'G',visitantePos:3,visitanteEsTercero:true,e:'Estadio Nueva York Nueva Jersey'},
+    {id:'r32_78',f:'Martes 30/6',localGrupo:'E',localPos:2,visitanteGrupo:'I',visitantePos:2,visitanteEsTercero:false,e:'Estadio Dallas'},
+    {id:'r32_79',f:'Martes 30/6',localGrupo:'A',localPos:1,visitanteGrupo:'C',visitantePos:3,visitanteEsTercero:true,e:'Estadio Ciudad de México'},
+    {id:'r32_80',f:'Miércoles 1/7',localGrupo:'L',localPos:1,visitanteGrupo:'H',visitantePos:3,visitanteEsTercero:true,e:'Estadio Atlanta'},
+    {id:'r32_81',f:'Miércoles 1/7',localGrupo:'D',localPos:1,visitanteGrupo:'B',visitantePos:3,visitanteEsTercero:true,e:'Estadio Bahía de San Francisco'},
+    {id:'r32_82',f:'Miércoles 1/7',localGrupo:'G',localPos:1,visitanteGrupo:'A',visitantePos:3,visitanteEsTercero:true,e:'Estadio Seattle'},
+    {id:'r32_83',f:'Jueves 2/7',localGrupo:'K',localPos:2,visitanteGrupo:'L',visitantePos:2,visitanteEsTercero:false,e:'Estadio Toronto'},
+    {id:'r32_84',f:'Jueves 2/7',localGrupo:'H',localPos:1,visitanteGrupo:'J',visitantePos:2,visitanteEsTercero:false,e:'Estadio Los Ángeles'},
+    {id:'r32_85',f:'Jueves 2/7',localGrupo:'B',localPos:1,visitanteGrupo:'E',visitantePos:3,visitanteEsTercero:true,e:'BC Place Vancouver'},
+    {id:'r32_86',f:'Viernes 3/7',localGrupo:'J',localPos:1,visitanteGrupo:'H',visitantePos:2,visitanteEsTercero:false,e:'Estadio Miami'},
+    {id:'r32_87',f:'Viernes 3/7',localGrupo:'K',localPos:1,visitanteGrupo:'L',visitantePos:3,visitanteEsTercero:true,e:'Estadio Kansas City'},
+    {id:'r32_88',f:'Viernes 3/7',localGrupo:'D',localPos:2,visitanteGrupo:'G',visitantePos:2,visitanteEsTercero:false,e:'Estadio Dallas'}
   ];
   
   return partidosBase.map(p => {
@@ -536,28 +536,26 @@ function generarRonda32(){
     return {
       id: p.id,
       f: p.f,
-      h: p.h,
       e: p.e,
       local: { equipo: localEquipo, texto: `${p.localPos}°${p.localGrupo}` },
       visitante: { equipo: visitanteEquipo, texto: visitanteTexto, esTerceroPendiente: p.visitanteEsTercero && !ASIGNACIONES_TERCEROS[p.id] },
-      requiereTercero: p.visitanteEsTercero,
-      partidoId: p.id
+      requiereTercero: p.visitanteEsTercero
     };
   });
 }
 
-function getGanador(id, local, visitante){
-  const r = RESULTADOS[id];
-  if(!r) return null;
-  if(r.gl > r.gv) return local;
-  if(r.gv > r.gl) return visitante;
-  let pLocal=0, pVisit=0;
+function getGanadorPartido(partido){
+  const res = RESULTADOS[partido.id];
+  if(!res) return null;
+  if(res.gl > res.gv) return partido.local.equipo;
+  if(res.gv > res.gl) return partido.visitante.equipo;
+  let penalesLocal = 0, penalesVisitante = 0;
   for(let i=1;i<=5;i++){
-    if(PENALES[`${id}_${local}_${i}`]==='verde') pLocal++;
-    if(PENALES[`${id}_${visitante}_${i}`]==='verde') pVisit++;
+    if(PENALES[`${partido.id}_${partido.local.equipo}_${i}`] === 'verde') penalesLocal++;
+    if(PENALES[`${partido.id}_${partido.visitante.equipo}_${i}`] === 'verde') penalesVisitante++;
   }
-  if(pLocal > pVisit) return local;
-  if(pVisit > pLocal) return visitante;
+  if(penalesLocal > penalesVisitante) return partido.local.equipo;
+  if(penalesVisitante > penalesLocal) return partido.visitante.equipo;
   return null;
 }
 
@@ -587,6 +585,7 @@ function asignarTercero(partidoId, equipo, grupoOrigen){
   guardarTodo();
   cerrarSelector();
   renderEliminatorias();
+  renderCalendario();
 }
 
 function cerrarSelector(){
@@ -742,7 +741,7 @@ function editarResultadoGrupo(id, grupo){
 function renderizarPartidoElim(p){
   const res = RESULTADOS[p.id];
   const empate = res && (res.gl === res.gv);
-  const ganador = (p.local.equipo && p.visitante.equipo && res) ? getGanador(p.id, p.local.equipo, p.visitante.equipo) : null;
+  const ganador = (p.local.equipo && p.visitante.equipo && res) ? getGanadorPartido(p) : null;
   
   let html = `<div class="partido-card"><div class="partido-header">📅 ${p.f} | 🏟️ ${p.e}</div><div class="partido-equipos">`;
   const localClass = (ganador === p.local.equipo) ? 'ganador' : ((res && ganador !== p.local.equipo) ? 'perdedor' : '');
@@ -780,43 +779,10 @@ function renderizarPartidoElim(p){
   return html;
 }
 
-function renderEliminatorias(){
-  const r32 = generarRonda32();
-  const octavos = [
-    {id:'oct_89',f:'Sábado 4/7',l:r32[0]?.local?.equipo, v:r32[2]?.local?.equipo, e:'Estadio Filadelfia'},
-    {id:'oct_90',f:'Sábado 4/7',l:r32[1]?.local?.equipo, v:r32[5]?.local?.equipo, e:'Estadio Houston'},
-    {id:'oct_91',f:'Domingo 5/7',l:r32[3]?.local?.equipo, v:r32[4]?.local?.equipo, e:'Estadio Nueva York Nueva Jersey'},
-    {id:'oct_92',f:'Domingo 5/7',l:r32[6]?.local?.equipo, v:r32[7]?.local?.equipo, e:'Estadio Ciudad de México'},
-    {id:'oct_93',f:'Lunes 6/7',l:r32[11]?.local?.equipo, v:r32[12]?.local?.equipo, e:'Estadio Dallas'},
-    {id:'oct_94',f:'Lunes 6/7',l:r32[9]?.local?.equipo, v:r32[10]?.local?.equipo, e:'Estadio Seattle'},
-    {id:'oct_95',f:'Martes 7/7',l:r32[14]?.local?.equipo, v:r32[15]?.local?.equipo, e:'Estadio Atlanta'},
-    {id:'oct_96',f:'Martes 7/7',l:r32[8]?.local?.equipo, v:r32[13]?.local?.equipo, e:'BC Place Vancouver'}
-  ];
-  const cuartos = [
-    {id:'cuar_97',f:'Jueves 9/7',l:null, v:null, e:'Estadio Boston'},{id:'cuar_98',f:'Viernes 10/7',l:null, v:null, e:'Estadio Los Ángeles'},
-    {id:'cuar_99',f:'Sábado 11/7',l:null, v:null, e:'Estadio Miami'},{id:'cuar_100',f:'Sábado 11/7',l:null, v:null, e:'Estadio Kansas City'}
-  ];
-  const semis = [
-    {id:'sem_101',f:'Martes 14/7',l:null, v:null, e:'Estadio Dallas'},{id:'sem_102',f:'Miércoles 15/7',l:null, v:null, e:'Estadio Atlanta'}
-  ];
-  const tercerPuesto = {id:'ter_103',f:'Sábado 18/7',l:null, v:null, e:'Estadio Miami'};
-  const final = {id:'final_104',f:'Domingo 19/7',l:null, v:null, e:'Estadio Nueva York Nueva Jersey'};
-  
-  let html = `<div class="eliminatorias-container">`;
-  html += `<div class="ronda-card"><div class="ronda-title">🏆 RONDA DE 32 (Dieciseisavos)</div><div class="ronda-partidos">${r32.map(p=>renderizarPartidoElim(p)).join('')}</div></div>`;
-  html += `<div class="ronda-card"><div class="ronda-title">🏆 OCTAVOS DE FINAL</div><div class="ronda-partidos">${octavos.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
-  html += `<div class="ronda-card"><div class="ronda-title">🏆 CUARTOS DE FINAL</div><div class="ronda-partidos">${cuartos.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
-  html += `<div class="ronda-card"><div class="ronda-title">🏆 SEMIFINALES</div><div class="ronda-partidos">${semis.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
-  html += `<div class="ronda-card"><div class="ronda-title">🥉 TERCER PUESTO</div><div class="ronda-partidos">${renderizarPartidoSimple(tercerPuesto)}</div></div>`;
-  html += `<div class="ronda-card"><div class="ronda-title">🏆 FINAL</div><div class="ronda-partidos">${renderizarPartidoSimple(final)}</div></div>`;
-  html += `</div>`;
-  document.getElementById('eliminatoria-content').innerHTML = html;
-}
-
 function renderizarPartidoSimple(p){
   const res = RESULTADOS[p.id];
   const empate = res && (res.gl === res.gv);
-  const ganador = (p.l && p.v && res) ? getGanador(p.id, p.l, p.v) : null;
+  const ganador = (p.l && p.v && res) ? (res.gl > res.gv ? p.l : (res.gv > res.gl ? p.v : null)) : null;
   let html = `<div class="partido-card"><div class="partido-header">📅 ${p.f} | 🏟️ ${p.e}</div><div class="partido-equipos">`;
   const localClass = (ganador === p.l) ? 'ganador' : ((res && ganador !== p.l) ? 'perdedor' : '');
   const visitanteClass = (ganador === p.v) ? 'ganador' : ((res && ganador !== p.v) ? 'perdedor' : '');
@@ -843,6 +809,116 @@ function renderizarPartidoSimple(p){
   }
   html += `</div></div>`;
   return html;
+}
+
+function renderEliminatorias(){
+  const r32 = generarRonda32();
+  
+  // Calcular ganadores de R32
+  const ganadoresR32 = {};
+  for(let p of r32){
+    ganadoresR32[p.id] = getGanadorPartido(p);
+  }
+  
+  // Octavos según resultados de R32
+  const octavos = [
+    {id:'oct_89',f:'Sábado 4/7',l:ganadoresR32['r32_73'], v:ganadoresR32['r32_74'], e:'Estadio Filadelfia'},
+    {id:'oct_90',f:'Sábado 4/7',l:ganadoresR32['r32_75'], v:ganadoresR32['r32_76'], e:'Estadio Houston'},
+    {id:'oct_91',f:'Domingo 5/7',l:ganadoresR32['r32_77'], v:ganadoresR32['r32_78'], e:'Estadio Nueva York Nueva Jersey'},
+    {id:'oct_92',f:'Domingo 5/7',l:ganadoresR32['r32_79'], v:ganadoresR32['r32_80'], e:'Estadio Ciudad de México'},
+    {id:'oct_93',f:'Lunes 6/7',l:ganadoresR32['r32_83'], v:ganadoresR32['r32_84'], e:'Estadio Dallas'},
+    {id:'oct_94',f:'Lunes 6/7',l:ganadoresR32['r32_85'], v:ganadoresR32['r32_86'], e:'Estadio Seattle'},
+    {id:'oct_95',f:'Martes 7/7',l:ganadoresR32['r32_87'], v:ganadoresR32['r32_88'], e:'Estadio Atlanta'},
+    {id:'oct_96',f:'Martes 7/7',l:ganadoresR32['r32_81'], v:ganadoresR32['r32_82'], e:'BC Place Vancouver'}
+  ];
+  
+  // Cuartos según resultados de OCTAVOS
+  const ganadoresOct = {};
+  for(let p of octavos){
+    const res = RESULTADOS[p.id];
+    if(res){
+      if(res.gl > res.gv) ganadoresOct[p.id] = p.l;
+      else if(res.gv > res.gl) ganadoresOct[p.id] = p.v;
+      else {
+        let penLocal=0, penVisit=0;
+        for(let i=1;i<=5;i++){
+          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+        }
+        ganadoresOct[p.id] = penLocal > penVisit ? p.l : p.v;
+      }
+    }
+  }
+  
+  const cuartos = [
+    {id:'cuar_97',f:'Jueves 9/7',l:ganadoresOct['oct_89'], v:ganadoresOct['oct_90'], e:'Estadio Boston'},
+    {id:'cuar_98',f:'Viernes 10/7',l:ganadoresOct['oct_93'], v:ganadoresOct['oct_94'], e:'Estadio Los Ángeles'},
+    {id:'cuar_99',f:'Sábado 11/7',l:ganadoresOct['oct_91'], v:ganadoresOct['oct_92'], e:'Estadio Miami'},
+    {id:'cuar_100',f:'Sábado 11/7',l:ganadoresOct['oct_95'], v:ganadoresOct['oct_96'], e:'Estadio Kansas City'}
+  ];
+  
+  // Semis según resultados de CUARTOS
+  const ganadoresCuar = {};
+  for(let p of cuartos){
+    const res = RESULTADOS[p.id];
+    if(res){
+      if(res.gl > res.gv) ganadoresCuar[p.id] = p.l;
+      else if(res.gv > res.gl) ganadoresCuar[p.id] = p.v;
+      else {
+        let penLocal=0, penVisit=0;
+        for(let i=1;i<=5;i++){
+          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+        }
+        ganadoresCuar[p.id] = penLocal > penVisit ? p.l : p.v;
+      }
+    }
+  }
+  
+  const semis = [
+    {id:'sem_101',f:'Martes 14/7',l:ganadoresCuar['cuar_97'], v:ganadoresCuar['cuar_98'], e:'Estadio Dallas'},
+    {id:'sem_102',f:'Miércoles 15/7',l:ganadoresCuar['cuar_99'], v:ganadoresCuar['cuar_100'], e:'Estadio Atlanta'}
+  ];
+  
+  // Final según resultados de SEMIS
+  const ganadoresSem = {};
+  for(let p of semis){
+    const res = RESULTADOS[p.id];
+    if(res){
+      if(res.gl > res.gv) ganadoresSem[p.id] = p.l;
+      else if(res.gv > res.gl) ganadoresSem[p.id] = p.v;
+      else {
+        let penLocal=0, penVisit=0;
+        for(let i=1;i<=5;i++){
+          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+        }
+        ganadoresSem[p.id] = penLocal > penVisit ? p.l : p.v;
+      }
+    }
+  }
+  
+  const final = {id:'final_104',f:'Domingo 19/7',l:ganadoresSem['sem_101'], v:ganadoresSem['sem_102'], e:'Estadio Nueva York Nueva Jersey'};
+  
+  // Tercer puesto
+  const perdedoresSem = {};
+  for(let p of semis){
+    if(ganadoresSem[p.id] === p.l) perdedoresSem[p.id] = p.v;
+    else if(ganadoresSem[p.id] === p.v) perdedoresSem[p.id] = p.l;
+    else perdedoresSem[p.id] = null;
+  }
+  const tercerPuesto = {id:'ter_103',f:'Sábado 18/7',l:perdedoresSem['sem_101'], v:perdedoresSem['sem_102'], e:'Estadio Miami'};
+  
+  // Renderizar
+  let html = `<div class="eliminatorias-container">`;
+  html += `<div class="ronda-card"><div class="ronda-title">🏆 RONDA DE 32 (Dieciseisavos)</div><div class="ronda-partidos">${r32.map(p=>renderizarPartidoElim(p)).join('')}</div></div>`;
+  html += `<div class="ronda-card"><div class="ronda-title">🏆 OCTAVOS DE FINAL</div><div class="ronda-partidos">${octavos.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
+  html += `<div class="ronda-card"><div class="ronda-title">🏆 CUARTOS DE FINAL</div><div class="ronda-partidos">${cuartos.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
+  html += `<div class="ronda-card"><div class="ronda-title">🏆 SEMIFINALES</div><div class="ronda-partidos">${semis.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
+  html += `<div class="ronda-card"><div class="ronda-title">🥉 TERCER PUESTO</div><div class="ronda-partidos">${renderizarPartidoSimple(tercerPuesto)}</div></div>`;
+  html += `<div class="ronda-card"><div class="ronda-title">🏆 FINAL</div><div class="ronda-partidos">${renderizarPartidoSimple(final)}</div></div>`;
+  html += `</div>`;
+  document.getElementById('eliminatoria-content').innerHTML = html;
 }
 
 function guardarEliminatoria(id){
