@@ -145,19 +145,19 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
       </div>
     </div>
     <div class="tabs-principales">
-      <button class="tab-principal" onclick="cambiarSeccion('inicio')">🏠 INICIO</button>
-      <button class="tab-principal active" onclick="cambiarSeccion('grupos')">📋 FASE DE GRUPOS</button>
+      <button class="tab-principal active" onclick="cambiarSeccion('inicio')">🏠 INICIO</button>
+      <button class="tab-principal" onclick="cambiarSeccion('grupos')">📋 FASE DE GRUPOS</button>
       <button class="tab-principal" onclick="cambiarSeccion('eliminatoria')">🏆 ELIMINATORIAS</button>
     </div>
   </div>
 </header>
 <div class="container">
-  <div id="seccion-inicio" class="contenido-principal">
+  <div id="seccion-inicio" class="contenido-principal active">
     <div class="ptitle">📅 CALENDARIO DE PARTIDOS</div>
     <p style="color:var(--muted);margin-bottom:15px;">📍 Todos los horarios en hora ARGENTINA (GMT-3). Los partidos ya jugados desaparecen automáticamente.</p>
     <div id="calendario-content"></div>
   </div>
-  <div id="seccion-grupos" class="contenido-principal active">
+  <div id="seccion-grupos" class="contenido-principal">
     <div class="tabs-grupos" id="tabs-grupos"></div>
     <div id="contenido-grupos"></div>
   </div>
@@ -1008,6 +1008,7 @@ function togglePenal(id, equipo, idx){
 }
 
 // ==================== RENDER TODOS LOS GRUPOS ====================
+let grupoActivo = 'A';
 function renderTodosLosGrupos(){
   let tabsHtml = '', contenidoHtml = '';
   for(let g of gruposLista){
@@ -1017,11 +1018,13 @@ function renderTodosLosGrupos(){
   document.getElementById('tabs-grupos').innerHTML = tabsHtml;
   document.getElementById('contenido-grupos').innerHTML = contenidoHtml;
   for(let g of gruposLista) renderGrupo(g);
-  document.querySelector('.tab-grupo')?.classList.add('active');
-  document.getElementById('grupo-A')?.classList.add('active');
+  const idx = gruposLista.indexOf(grupoActivo);
+  document.querySelectorAll('.tab-grupo')[idx >= 0 ? idx : 0]?.classList.add('active');
+  document.getElementById(`grupo-${grupoActivo}`)?.classList.add('active');
 }
 
 function cambiarGrupo(grupo){
+  grupoActivo = grupo;
   document.querySelectorAll('.tab-grupo').forEach(btn=>btn.classList.remove('active'));
   document.querySelectorAll('.contenido-grupo').forEach(c=>c.classList.remove('active'));
   const idx = gruposLista.indexOf(grupo);
