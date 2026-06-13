@@ -16,6 +16,8 @@
 <meta name="apple-mobile-web-app-title" content="Mundial 2026">
 <meta name="theme-color" content="#0a0a0f">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --gold:#FFD700;--gold2:#FFA500;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a24;
@@ -312,11 +314,57 @@ const ELIMINATORIOS_CALENDARIO = [
   {fecha:'Domingo 19/7',h:'',nombre:'FINAL - Partido 104',estadio:'Estadio Nueva York Nueva Jersey'}
 ];
 
+// ==================== FIREBASE ====================
+const firebaseConfig = {
+  apiKey: "AIzaSyBI5Il0cdHvuqrf62tkaS2ZjD7PAsj7a4s",
+  authDomain: "fixturemundial-434d5.firebaseapp.com",
+  databaseURL: "https://fixturemundial-434d5-default-rtdb.firebaseio.com",
+  projectId: "fixturemundial-434d5"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 // ==================== RESULTADOS Y ASIGNACIONES ====================
 let RESULTADOS = JSON.parse(localStorage.getItem('mundial2026_res')||'{}');
 let PENALES = JSON.parse(localStorage.getItem('mundial2026_penales')||'{}');
 let ASIGNACIONES_TERCEROS = JSON.parse(localStorage.getItem('mundial2026_terceros')||'{}');
-function guardarTodo(){localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));}
+
+let _firebaseListo = false;
+
+function guardarTodo(){
+  localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));
+  localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));
+  localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));
+  // Subir a Firebase para que se vea en todos los dispositivos
+  db.ref('mundial2026').set({
+    resultados: RESULTADOS,
+    penales: PENALES,
+    terceros: ASIGNACIONES_TERCEROS
+  });
+}
+
+// Escuchar cambios en tiempo real (PC, celular, etc se sincronizan solos)
+db.ref('mundial2026').on('value', (snapshot)=>{
+  const datos = snapshot.val();
+  if(!datos){
+    // Si no hay nada en Firebase todavía, subimos lo que tengamos localmente
+    if(!_firebaseListo){ _firebaseListo = true; guardarTodo(); }
+    return;
+  }
+  RESULTADOS = datos.resultados || {};
+  PENALES = datos.penales || {};
+  ASIGNACIONES_TERCEROS = datos.terceros || {};
+  localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));
+  localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));
+  localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));
+  if(_firebaseListo){
+    // Re-renderizar todo cuando llega un cambio desde otro dispositivo
+    renderCalendario();
+    renderTodosLosGrupos();
+    renderEliminatorias();
+  }
+  _firebaseListo = true;
+});
 
 // ==================== PLANTELES (solo para tabla de posiciones) ====================
 const PLANTELES = {
