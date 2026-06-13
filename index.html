@@ -16,6 +16,9 @@
 <meta name="apple-mobile-web-app-title" content="Mundial 2026">
 <meta name="theme-color" content="#0a0a0f">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --gold:#FFD700;--gold2:#FFA500;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a24;
@@ -32,6 +35,9 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
 .simular-btn,.reset-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:20px;padding:5px 12px;font-family:'Barlow Condensed';font-weight:800;font-size:.7rem;cursor:pointer;transition:all .2s;}
 .reset-btn{background:linear-gradient(135deg,var(--red),#c1121f);color:white;}
 .simular-btn:hover,.reset-btn:hover{transform:scale(1.05);}
+.sync-status{font-size:.7rem;background:rgba(0,0,0,.5);padding:4px 10px;border-radius:20px;color:var(--muted);}
+.sync-status.synced{color:var(--green);}
+.sync-status.syncing{color:var(--gold);}
 .tabs-principales{display:flex;gap:4px;background:rgba(0,0,0,.3);padding:4px;border-radius:12px;}
 .tab-principal{background:none;border:none;color:var(--muted);font-family:'Barlow Condensed';font-size:.85rem;font-weight:700;padding:8px 20px;border-radius:8px;cursor:pointer;transition:all .2s;}
 .tab-principal.active,.tab-principal:hover{background:rgba(255,215,0,.15);color:var(--gold);}
@@ -142,6 +148,7 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
         <button class="reset-btn" onclick="resetFaseGrupos()">🗑️ RESET</button>
       </div>
     </div>
+    <div class="sync-status" id="syncStatus">🔄 Conectando...</div>
     <div class="tabs-principales">
       <button class="tab-principal" onclick="cambiarSeccion('inicio')">🏠 INICIO</button>
       <button class="tab-principal active" onclick="cambiarSeccion('grupos')">📋 FASE DE GRUPOS</button>
@@ -167,6 +174,204 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
 <div id="modalPlantel" class="modal"><div class="modal-content"><div class="modal-header"><h3>📋 PLANTEL</h3><button class="modal-close" onclick="cerrarModalPlantel()">✕</button></div><div class="modal-body" id="modalPlantelBody"></div><div class="modal-footer"><button class="btn-cerrar-modal" onclick="cerrarModalPlantel()">Cerrar</button></div></div></div>
 
 <script>
+// ==================== CONFIGURACIÓN DE FIREBASE ====================
+// ⚠️ IMPORTANTE: REEMPLAZA ESTOS DATOS CON LOS DE TU PROYECTO EN FIREBASE ⚠️
+// Puedes obtenerlos desde: https://console.firebase.google.com/
+// Ve a Configuración del proyecto -> Tus aplicaciones -> Configuración del SDK
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  databaseURL: "TU_DATABASE_URL",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// Referencias en la base de datos
+const resultadosRef = database.ref('mundial2026/resultados');
+const penalesRef = database.ref('mundial2026/penales');
+const tercerosRef = database.ref('mundial2026/terceros');
+
+// Estado de sincronización
+let isLoadingFromFirebase = false;
+let isSavingToFirebase = false;
+
+// Función para actualizar estado de sincronización
+function updateSyncStatus(status, isError = false) {
+  const syncDiv = document.getElementById('syncStatus');
+  if (isError) {
+    syncDiv.innerHTML = '⚠️ Error de sincronización';
+    syncDiv.style.color = 'var(--red)';
+  } else if (status === 'synced') {
+    syncDiv.innerHTML = '✅ Sincronizado';
+    syncDiv.style.color = 'var(--green)';
+  } else if (status === 'syncing') {
+    syncDiv.innerHTML = '🔄 Sincronizando...';
+    syncDiv.style.color = 'var(--gold)';
+  } else if (status === 'connected') {
+    syncDiv.innerHTML = '☁️ Conectado a la nube';
+    syncDiv.style.color = 'var(--green)';
+  } else if (status === 'disconnected') {
+    syncDiv.innerHTML = '📡 Sin conexión - modo local';
+    syncDiv.style.color = 'var(--red)';
+  }
+}
+
+// Escuchar cambios en tiempo real desde Firebase
+function setupFirebaseListeners() {
+  // Escuchar cambios en resultados
+  resultadosRef.on('value', (snapshot) => {
+    if (isSavingToFirebase) return;
+    isLoadingFromFirebase = true;
+    const data = snapshot.val();
+    if (data) {
+      window.RESULTADOS = data;
+    } else {
+      window.RESULTADOS = {};
+    }
+    guardarTodoLocal();
+    refreshAllViews();
+    isLoadingFromFirebase = false;
+  }, (error) => {
+    console.error('Error al cargar resultados:', error);
+    updateSyncStatus('disconnected', true);
+  });
+
+  // Escuchar cambios en penales
+  penalesRef.on('value', (snapshot) => {
+    if (isSavingToFirebase) return;
+    isLoadingFromFirebase = true;
+    const data = snapshot.val();
+    if (data) {
+      window.PENALES = data;
+    } else {
+      window.PENALES = {};
+    }
+    guardarTodoLocal();
+    refreshAllViews();
+    isLoadingFromFirebase = false;
+  }, (error) => {
+    console.error('Error al cargar penales:', error);
+  });
+
+  // Escuchar cambios en terceros
+  tercerosRef.on('value', (snapshot) => {
+    if (isSavingToFirebase) return;
+    isLoadingFromFirebase = true;
+    const data = snapshot.val();
+    if (data) {
+      window.ASIGNACIONES_TERCEROS = data;
+    } else {
+      window.ASIGNACIONES_TERCEROS = {};
+    }
+    guardarTodoLocal();
+    refreshAllViews();
+    isLoadingFromFirebase = false;
+  }, (error) => {
+    console.error('Error al cargar terceros:', error);
+  });
+
+  // Monitorear estado de conexión
+  database.ref('.info/connected').on('value', (snap) => {
+    if (snap.val() === true) {
+      updateSyncStatus('connected');
+    } else {
+      updateSyncStatus('disconnected');
+    }
+  });
+}
+
+// Guardar datos en Firebase
+async function syncToFirebase() {
+  if (isLoadingFromFirebase) return;
+  isSavingToFirebase = true;
+  updateSyncStatus('syncing');
+  
+  try {
+    await Promise.all([
+      resultadosRef.set(window.RESULTADOS || {}),
+      penalesRef.set(window.PENALES || {}),
+      tercerosRef.set(window.ASIGNACIONES_TERCEROS || {})
+    ]);
+    updateSyncStatus('synced');
+  } catch (error) {
+    console.error('Error al sincronizar con Firebase:', error);
+    updateSyncStatus('disconnected', true);
+  } finally {
+    isSavingToFirebase = false;
+  }
+}
+
+// Guardar en localStorage (copia local)
+function guardarTodoLocal() {
+  localStorage.setItem('mundial2026_res', JSON.stringify(window.RESULTADOS || {}));
+  localStorage.setItem('mundial2026_penales', JSON.stringify(window.PENALES || {}));
+  localStorage.setItem('mundial2026_terceros', JSON.stringify(window.ASIGNACIONES_TERCEROS || {}));
+}
+
+// Guardar todo y sincronizar con Firebase
+function guardarTodo() {
+  guardarTodoLocal();
+  syncToFirebase();
+}
+
+// Recargar todas las vistas
+function refreshAllViews() {
+  renderTodosLosGrupos();
+  renderEliminatorias();
+  renderCalendario();
+}
+
+// Cargar datos iniciales (de Firebase o localStorage como fallback)
+async function loadInitialData() {
+  try {
+    // Intentar cargar desde Firebase primero
+    const [resultadosSnap, penalesSnap, tercerosSnap] = await Promise.all([
+      resultadosRef.once('value'),
+      penalesRef.once('value'),
+      tercerosRef.once('value')
+    ]);
+    
+    window.RESULTADOS = resultadosSnap.val() || {};
+    window.PENALES = penalesSnap.val() || {};
+    window.ASIGNACIONES_TERCEROS = tercerosSnap.val() || {};
+    
+    // Si Firebase no tiene datos, intentar cargar desde localStorage
+    if (Object.keys(window.RESULTADOS).length === 0) {
+      const localRes = localStorage.getItem('mundial2026_res');
+      if (localRes) window.RESULTADOS = JSON.parse(localRes);
+    }
+    if (Object.keys(window.PENALES).length === 0) {
+      const localPen = localStorage.getItem('mundial2026_penales');
+      if (localPen) window.PENALES = JSON.parse(localPen);
+    }
+    if (Object.keys(window.ASIGNACIONES_TERCEROS).length === 0) {
+      const localTer = localStorage.getItem('mundial2026_terceros');
+      if (localTer) window.ASIGNACIONES_TERCEROS = JSON.parse(localTer);
+    }
+    
+    // Sincronizar datos locales a Firebase si no existían
+    if (Object.keys(window.RESULTADOS).length > 0 && (!resultadosSnap.val() || Object.keys(resultadosSnap.val()).length === 0)) {
+      await syncToFirebase();
+    }
+  } catch (error) {
+    console.error('Error al cargar datos iniciales:', error);
+    // Fallback a localStorage
+    window.RESULTADOS = JSON.parse(localStorage.getItem('mundial2026_res') || '{}');
+    window.PENALES = JSON.parse(localStorage.getItem('mundial2026_penales') || '{}');
+    window.ASIGNACIONES_TERCEROS = JSON.parse(localStorage.getItem('mundial2026_terceros') || '{}');
+    updateSyncStatus('disconnected', true);
+  }
+  
+  guardarTodoLocal();
+  refreshAllViews();
+}
+
 // ==================== BANDERAS ====================
 const FC = {
   'México':'mx','Sudáfrica':'za','Corea del Sur':'kr','Rep. Checa':'cz','Canadá':'ca',
@@ -197,7 +402,7 @@ const GRUPOS = {
   L:['Inglaterra','Croacia','Ghana','Panamá']
 };
 
-// ==================== PARTIDOS DE GRUPO (HORARIOS ARGENTINA) ====================
+// ==================== PARTIDOS DE GRUPO ====================
 const PARTIDOS_POR_GRUPO = {};
 const gruposLista = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 const partidosData = {
@@ -276,7 +481,7 @@ const partidosData = {
 };
 for(let g of gruposLista){PARTIDOS_POR_GRUPO[g]=partidosData[g].map(p=>({id:p.id,fechaISO:p.f,fecha:p.fecha,hora:p.h,local:p.l,visitante:p.v,estadio:p.e}));}
 
-// ==================== PARTIDOS ELIMINATORIOS PARA CALENDARIO ====================
+// ==================== ELIMINATORIOS CALENDARIO ====================
 const ELIMINATORIOS_CALENDARIO = [
   {fecha:'Domingo 28/6',h:'',nombre:'Partido 73 - 2°A vs 2°B',estadio:'Estadio Los Ángeles'},
   {fecha:'Lunes 29/6',h:'',nombre:'Partido 74 - 1°E vs 3°',estadio:'Estadio Boston'},
@@ -312,13 +517,7 @@ const ELIMINATORIOS_CALENDARIO = [
   {fecha:'Domingo 19/7',h:'',nombre:'FINAL - Partido 104',estadio:'Estadio Nueva York Nueva Jersey'}
 ];
 
-// ==================== RESULTADOS Y ASIGNACIONES ====================
-let RESULTADOS = JSON.parse(localStorage.getItem('mundial2026_res')||'{}');
-let PENALES = JSON.parse(localStorage.getItem('mundial2026_penales')||'{}');
-let ASIGNACIONES_TERCEROS = JSON.parse(localStorage.getItem('mundial2026_terceros')||'{}');
-function guardarTodo(){localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));}
-
-// ==================== PLANTELES (solo para tabla de posiciones) ====================
+// ==================== PLANTELES ====================
 const PLANTELES = {
   'Argentina':[{num:1,nombre:'Emiliano Martínez',pos:'POR'},{num:2,nombre:'Nahuel Molina',pos:'DEF'},{num:3,nombre:'Cristian Romero',pos:'DEF'},{num:4,nombre:'Nicolás Otamendi',pos:'DEF'},{num:5,nombre:'Lisandro Martínez',pos:'DEF'},{num:6,nombre:'Nicolás Tagliafico',pos:'DEF'},{num:7,nombre:'Leandro Paredes',pos:'MED'},{num:8,nombre:'Enzo Fernández',pos:'MED'},{num:9,nombre:'Alexis Mac Allister',pos:'MED'},{num:10,nombre:'Rodrigo De Paul',pos:'MED'},{num:11,nombre:'Julián Álvarez',pos:'DEL'},{num:12,nombre:'Lionel Messi',pos:'DEL'},{num:13,nombre:'Lautaro Martínez',pos:'DEL'}],
   'México':[{num:1,nombre:'Guillermo Ochoa',pos:'POR'},{num:2,nombre:'Jorge Sánchez',pos:'DEF'},{num:3,nombre:'César Montes',pos:'DEF'},{num:4,nombre:'Johan Vásquez',pos:'DEF'},{num:5,nombre:'Jesús Gallardo',pos:'DEF'},{num:6,nombre:'Edson Álvarez',pos:'MED'},{num:7,nombre:'Luis Chávez',pos:'MED'},{num:8,nombre:'Orbelín Pineda',pos:'MED'},{num:9,nombre:'Roberto Alvarado',pos:'DEL'},{num:10,nombre:'Santiago Giménez',pos:'DEL'},{num:11,nombre:'Raúl Jiménez',pos:'DEL'}]
@@ -342,14 +541,12 @@ function resetFaseGrupos(){
   if(confirm('¿Estás seguro? Se borrarán TODOS los resultados de la fase de grupos.')){
     for(let g of gruposLista){
       for(let p of PARTIDOS_POR_GRUPO[g]){
-        delete RESULTADOS[p.id];
+        delete window.RESULTADOS[p.id];
       }
     }
-    ASIGNACIONES_TERCEROS = {};
+    window.ASIGNACIONES_TERCEROS = {};
     guardarTodo();
-    renderTodosLosGrupos();
-    renderEliminatorias();
-    renderCalendario();
+    refreshAllViews();
     alert('✅ Todos los resultados han sido eliminados.');
   }
 }
@@ -360,14 +557,12 @@ function simularFaseGrupos(){
       for(let p of PARTIDOS_POR_GRUPO[g]){
         const golesLocal = Math.floor(Math.random() * 5);
         const golesVisitante = Math.floor(Math.random() * 5);
-        RESULTADOS[p.id] = {gl: golesLocal, gv: golesVisitante};
+        window.RESULTADOS[p.id] = {gl: golesLocal, gv: golesVisitante};
       }
     }
-    ASIGNACIONES_TERCEROS = {};
+    window.ASIGNACIONES_TERCEROS = {};
     guardarTodo();
-    renderTodosLosGrupos();
-    renderEliminatorias();
-    renderCalendario();
+    refreshAllViews();
     alert('✅ Fase de grupos simulada!');
   }
 }
@@ -437,7 +632,7 @@ function getStats(equipo,grupo){
   let pj=0,g=0,e=0,p=0,gf=0,gc=0;
   PARTIDOS_POR_GRUPO[grupo].forEach(m=>{
     if(m.local===equipo || m.visitante===equipo){
-      const r = RESULTADOS[m.id];
+      const r = window.RESULTADOS[m.id];
       if(!r) return;
       pj++;
       const gEq = m.local===equipo ? r.gl : r.gv;
@@ -455,7 +650,7 @@ function getStats(equipo,grupo){
 function faseGruposCompleta(){
   for(let g of gruposLista){
     for(let p of PARTIDOS_POR_GRUPO[g]){
-      if(!RESULTADOS[p.id]) return false;
+      if(!window.RESULTADOS[p.id]) return false;
     }
   }
   return true;
@@ -532,7 +727,7 @@ function generarRonda32(){
     let visitanteTexto = '';
     
     if(p.visitanteEsTercero){
-      const asignado = ASIGNACIONES_TERCEROS[p.id];
+      const asignado = window.ASIGNACIONES_TERCEROS[p.id];
       if(asignado){
         visitanteEquipo = asignado.equipo;
         visitanteTexto = `3° ${asignado.grupoOrigen} ✅`;
@@ -549,21 +744,21 @@ function generarRonda32(){
       f: p.f,
       e: p.e,
       local: { equipo: localEquipo, texto: `${p.localPos}°${p.localGrupo}` },
-      visitante: { equipo: visitanteEquipo, texto: visitanteTexto, esTerceroPendiente: p.visitanteEsTercero && !ASIGNACIONES_TERCEROS[p.id] },
+      visitante: { equipo: visitanteEquipo, texto: visitanteTexto, esTerceroPendiente: p.visitanteEsTercero && !window.ASIGNACIONES_TERCEROS[p.id] },
       requiereTercero: p.visitanteEsTercero
     };
   });
 }
 
 function getGanadorPartido(partido){
-  const res = RESULTADOS[partido.id];
+  const res = window.RESULTADOS[partido.id];
   if(!res) return null;
   if(res.gl > res.gv) return partido.local.equipo;
   if(res.gv > res.gl) return partido.visitante.equipo;
   let penalesLocal = 0, penalesVisitante = 0;
   for(let i=1;i<=5;i++){
-    if(PENALES[`${partido.id}_${partido.local.equipo}_${i}`] === 'verde') penalesLocal++;
-    if(PENALES[`${partido.id}_${partido.visitante.equipo}_${i}`] === 'verde') penalesVisitante++;
+    if(window.PENALES[`${partido.id}_${partido.local.equipo}_${i}`] === 'verde') penalesLocal++;
+    if(window.PENALES[`${partido.id}_${partido.visitante.equipo}_${i}`] === 'verde') penalesVisitante++;
   }
   if(penalesLocal > penalesVisitante) return partido.local.equipo;
   if(penalesVisitante > penalesLocal) return partido.visitante.equipo;
@@ -579,7 +774,7 @@ function abrirSelectorTerceros(partidoId){
   }
   let html = `<p style="margin-bottom:10px;">Selecciona qué equipo ocupará el 3° lugar en este partido:</p><div style="max-height:300px;overflow-y:auto;">`;
   for(let t of mejoresTerceros){
-    const yaAsignado = Object.values(ASIGNACIONES_TERCEROS).some(a => a.equipo === t.equipo && a.grupoOrigen === t.grupo);
+    const yaAsignado = Object.values(window.ASIGNACIONES_TERCEROS).some(a => a.equipo === t.equipo && a.grupoOrigen === t.grupo);
     if(yaAsignado){
       html += `<div class="tercero-item" style="opacity:0.5;"><div>${flagImg(t.equipo,24,18)} ${t.equipo} (3° Grupo ${t.grupo}) - ${t.pts} pts</div><span style="color:var(--green);">✅ Ya asignado</span></div>`;
     } else {
@@ -592,7 +787,7 @@ function abrirSelectorTerceros(partidoId){
 }
 
 function asignarTercero(partidoId, equipo, grupoOrigen){
-  ASIGNACIONES_TERCEROS[partidoId] = { equipo: equipo, grupoOrigen: grupoOrigen };
+  window.ASIGNACIONES_TERCEROS[partidoId] = { equipo: equipo, grupoOrigen: grupoOrigen };
   guardarTodo();
   cerrarSelector();
   renderEliminatorias();
@@ -618,7 +813,7 @@ function renderCalendario(){
         estadio: p.estadio,
         grupo: g,
         esEliminatoria: false,
-        resultado: RESULTADOS[p.id]
+        resultado: window.RESULTADOS[p.id]
       });
     }
   }
@@ -679,7 +874,7 @@ function renderGrupo(grupo){
   const partidos = PARTIDOS_POR_GRUPO[grupo];
   let partidosHtml = `<div class="partidos-grid">`;
   for(let p of partidos){
-    const res = RESULTADOS[p.id];
+    const res = window.RESULTADOS[p.id];
     let localClass = '', visitanteClass = '';
     if(res){
       if(res.gl > res.gv) localClass = 'ganador';
@@ -732,7 +927,7 @@ function guardarResultadoGrupo(id, grupo){
   const gv = document.getElementById(`gv-${id}`)?.value;
   if(!gl || !gv || gl==='' || gv===''){alert('Ingresa ambos goles'); return;}
   const golesLocal = parseInt(gl), golesVisitante = parseInt(gv);
-  RESULTADOS[id] = {gl: golesLocal, gv: golesVisitante};
+  window.RESULTADOS[id] = {gl: golesLocal, gv: golesVisitante};
   guardarTodo();
   renderGrupo(grupo);
   renderEliminatorias();
@@ -741,7 +936,7 @@ function guardarResultadoGrupo(id, grupo){
 }
 
 function editarResultadoGrupo(id, grupo){
-  delete RESULTADOS[id];
+  delete window.RESULTADOS[id];
   guardarTodo();
   renderGrupo(grupo);
   renderEliminatorias();
@@ -750,7 +945,7 @@ function editarResultadoGrupo(id, grupo){
 
 // ==================== RENDER ELIMINATORIAS ====================
 function renderizarPartidoElim(p){
-  const res = RESULTADOS[p.id];
+  const res = window.RESULTADOS[p.id];
   const empate = res && (res.gl === res.gv);
   const ganador = (p.local.equipo && p.visitante.equipo && res) ? getGanadorPartido(p) : null;
   
@@ -765,7 +960,7 @@ function renderizarPartidoElim(p){
   else html += `Por definir`;
   html += `</div><div class="equipo-score">${res ? res.gv : '—'}</div></div>`;
   
-  if(p.requiereTercero && !ASIGNACIONES_TERCEROS[p.id]) html += `<button class="btn-seleccionar" onclick="abrirSelectorTerceros('${p.id}')">⚡ SELECCIONAR 3° LUGAR</button>`;
+  if(p.requiereTercero && !window.ASIGNACIONES_TERCEROS[p.id]) html += `<button class="btn-seleccionar" onclick="abrirSelectorTerceros('${p.id}')">⚡ SELECCIONAR 3° LUGAR</button>`;
   
   if(p.local.equipo && p.visitante.equipo && !p.visitante.esTerceroPendiente){
     if(!res) html += `<div class="input-resultado"><input type="number" id="gl-${p.id}" placeholder="0"><span>—</span><input type="number" id="gv-${p.id}" placeholder="0"><button onclick="guardarEliminatoria('${p.id}')">Guardar</button></div>`;
@@ -776,7 +971,7 @@ function renderizarPartidoElim(p){
         for(let eq of [p.local.equipo, p.visitante.equipo]){
           html += `<div><div style="font-size:.7rem;text-align:center">${flagImg(eq,20,15)} ${eq}</div><div class="penal-circles">`;
           for(let i=1;i<=5;i++){
-            const estado = PENALES[`${p.id}_${eq}_${i}`];
+            const estado = window.PENALES[`${p.id}_${eq}_${i}`];
             let clase = estado==='verde'?'verde':(estado==='rojo'?'rojo':'');
             html += `<div class="penal-circle ${clase}" onclick="togglePenal('${p.id}','${eq}',${i})">${i}</div>`;
           }
@@ -791,7 +986,7 @@ function renderizarPartidoElim(p){
 }
 
 function renderizarPartidoSimple(p){
-  const res = RESULTADOS[p.id];
+  const res = window.RESULTADOS[p.id];
   const empate = res && (res.gl === res.gv);
   const ganador = (p.l && p.v && res) ? (res.gl > res.gv ? p.l : (res.gv > res.gl ? p.v : null)) : null;
   let html = `<div class="partido-card"><div class="partido-header">📅 ${p.f} | 🏟️ ${p.e}</div><div class="partido-equipos">`;
@@ -808,7 +1003,7 @@ function renderizarPartidoSimple(p){
         for(let eq of [p.l, p.v]){
           html += `<div><div style="font-size:.7rem;text-align:center">${flagImg(eq,20,15)} ${eq}</div><div class="penal-circles">`;
           for(let i=1;i<=5;i++){
-            const estado = PENALES[`${p.id}_${eq}_${i}`];
+            const estado = window.PENALES[`${p.id}_${eq}_${i}`];
             let clase = estado==='verde'?'verde':(estado==='rojo'?'rojo':'');
             html += `<div class="penal-circle ${clase}" onclick="togglePenal('${p.id}','${eq}',${i})">${i}</div>`;
           }
@@ -846,15 +1041,15 @@ function renderEliminatorias(){
   // Cuartos según resultados de OCTAVOS
   const ganadoresOct = {};
   for(let p of octavos){
-    const res = RESULTADOS[p.id];
+    const res = window.RESULTADOS[p.id];
     if(res){
       if(res.gl > res.gv) ganadoresOct[p.id] = p.l;
       else if(res.gv > res.gl) ganadoresOct[p.id] = p.v;
       else {
         let penLocal=0, penVisit=0;
         for(let i=1;i<=5;i++){
-          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
-          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+          if(window.PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(window.PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
         }
         ganadoresOct[p.id] = penLocal > penVisit ? p.l : p.v;
       }
@@ -871,15 +1066,15 @@ function renderEliminatorias(){
   // Semis según resultados de CUARTOS
   const ganadoresCuar = {};
   for(let p of cuartos){
-    const res = RESULTADOS[p.id];
+    const res = window.RESULTADOS[p.id];
     if(res){
       if(res.gl > res.gv) ganadoresCuar[p.id] = p.l;
       else if(res.gv > res.gl) ganadoresCuar[p.id] = p.v;
       else {
         let penLocal=0, penVisit=0;
         for(let i=1;i<=5;i++){
-          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
-          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+          if(window.PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(window.PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
         }
         ganadoresCuar[p.id] = penLocal > penVisit ? p.l : p.v;
       }
@@ -894,15 +1089,15 @@ function renderEliminatorias(){
   // Final según resultados de SEMIS
   const ganadoresSem = {};
   for(let p of semis){
-    const res = RESULTADOS[p.id];
+    const res = window.RESULTADOS[p.id];
     if(res){
       if(res.gl > res.gv) ganadoresSem[p.id] = p.l;
       else if(res.gv > res.gl) ganadoresSem[p.id] = p.v;
       else {
         let penLocal=0, penVisit=0;
         for(let i=1;i<=5;i++){
-          if(PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
-          if(PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
+          if(window.PENALES[`${p.id}_${p.l}_${i}`] === 'verde') penLocal++;
+          if(window.PENALES[`${p.id}_${p.v}_${i}`] === 'verde') penVisit++;
         }
         ganadoresSem[p.id] = penLocal > penVisit ? p.l : p.v;
       }
@@ -936,7 +1131,7 @@ function guardarEliminatoria(id){
   const gl = document.getElementById(`gl-${id}`)?.value;
   const gv = document.getElementById(`gv-${id}`)?.value;
   if(!gl || !gv || gl==='' || gv===''){alert('Ingresa ambos goles'); return;}
-  RESULTADOS[id] = {gl:parseInt(gl), gv:parseInt(gv)};
+  window.RESULTADOS[id] = {gl:parseInt(gl), gv:parseInt(gv)};
   guardarTodo();
   renderEliminatorias();
   renderTodosLosGrupos();
@@ -944,7 +1139,7 @@ function guardarEliminatoria(id){
 }
 
 function editarEliminatoria(id){
-  delete RESULTADOS[id];
+  delete window.RESULTADOS[id];
   guardarTodo();
   renderEliminatorias();
   renderTodosLosGrupos();
@@ -952,9 +1147,9 @@ function editarEliminatoria(id){
 
 function togglePenal(id, equipo, idx){
   const key = `${id}_${equipo}_${idx}`;
-  if(!PENALES[key]) PENALES[key] = 'verde';
-  else if(PENALES[key] === 'verde') PENALES[key] = 'rojo';
-  else delete PENALES[key];
+  if(!window.PENALES[key]) window.PENALES[key] = 'verde';
+  else if(window.PENALES[key] === 'verde') window.PENALES[key] = 'rojo';
+  else delete window.PENALES[key];
   guardarTodo();
   renderEliminatorias();
 }
@@ -999,8 +1194,15 @@ function cambiarSeccion(seccion){
   }
 }
 
-renderCalendario();
-renderTodosLosGrupos();
+// Inicializar la aplicación
+async function init() {
+  await loadInitialData();
+  setupFirebaseListeners();
+  renderCalendario();
+  renderTodosLosGrupos();
+}
+
+init();
 </script>
 </body>
 </html>
