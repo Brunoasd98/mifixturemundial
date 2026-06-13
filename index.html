@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mundial 2026 - Fixture Completo</title>
+<!-- Ícono para la pantalla de inicio y pestañas -->
 <link rel="apple-touch-icon" sizes="180x180" href="https://i.imgur.com/OJkKEvL.jpeg">
 <link rel="icon" type="image/jpeg" sizes="32x32" href="https://i.imgur.com/OJkKEvL.jpeg">
 <link rel="icon" type="image/jpeg" sizes="16x16" href="https://i.imgur.com/OJkKEvL.jpeg">
 <link rel="shortcut icon" href="https://i.imgur.com/OJkKEvL.jpeg">
+
+<!-- Para que se comporte como app en el celular -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mundial 2026">
 <meta name="theme-color" content="#0a0a0f">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600;700;900&family=Barlow+Condensed:wght@400;700;900&display=swap" rel="stylesheet">
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
 :root{
   --gold:#FFD700;--gold2:#FFA500;--dark:#0a0a0f;--dark2:#111118;--dark3:#1a1a24;
@@ -32,10 +32,6 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
 .simular-btn,.reset-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);border:none;border-radius:20px;padding:5px 12px;font-family:'Barlow Condensed';font-weight:800;font-size:.7rem;cursor:pointer;transition:all .2s;}
 .reset-btn{background:linear-gradient(135deg,var(--red),#c1121f);color:white;}
 .simular-btn:hover,.reset-btn:hover{transform:scale(1.05);}
-.sync-status{font-size:.7rem;background:rgba(0,0,0,.5);padding:4px 10px;border-radius:20px;color:var(--muted);}
-.sync-status.synced{color:var(--green);}
-.sync-status.syncing{color:var(--gold);}
-.sync-status.error{color:var(--red);}
 .tabs-principales{display:flex;gap:4px;background:rgba(0,0,0,.3);padding:4px;border-radius:12px;}
 .tab-principal{background:none;border:none;color:var(--muted);font-family:'Barlow Condensed';font-size:.85rem;font-weight:700;padding:8px 20px;border-radius:8px;cursor:pointer;transition:all .2s;}
 .tab-principal.active,.tab-principal:hover{background:rgba(255,215,0,.15);color:var(--gold);}
@@ -146,7 +142,6 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
         <button class="reset-btn" onclick="resetFaseGrupos()">🗑️ RESET</button>
       </div>
     </div>
-    <div class="sync-status" id="syncStatus">🔄 Conectando...</div>
     <div class="tabs-principales">
       <button class="tab-principal" onclick="cambiarSeccion('inicio')">🏠 INICIO</button>
       <button class="tab-principal active" onclick="cambiarSeccion('grupos')">📋 FASE DE GRUPOS</button>
@@ -321,9 +316,9 @@ const ELIMINATORIOS_CALENDARIO = [
 let RESULTADOS = JSON.parse(localStorage.getItem('mundial2026_res')||'{}');
 let PENALES = JSON.parse(localStorage.getItem('mundial2026_penales')||'{}');
 let ASIGNACIONES_TERCEROS = JSON.parse(localStorage.getItem('mundial2026_terceros')||'{}');
-function guardarTodoLocal(){localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));}
+function guardarTodo(){localStorage.setItem('mundial2026_res',JSON.stringify(RESULTADOS));localStorage.setItem('mundial2026_penales',JSON.stringify(PENALES));localStorage.setItem('mundial2026_terceros',JSON.stringify(ASIGNACIONES_TERCEROS));}
 
-// ==================== PLANTELES ====================
+// ==================== PLANTELES (solo para tabla de posiciones) ====================
 const PLANTELES = {
   'Argentina':[{num:1,nombre:'Emiliano Martínez',pos:'POR'},{num:2,nombre:'Nahuel Molina',pos:'DEF'},{num:3,nombre:'Cristian Romero',pos:'DEF'},{num:4,nombre:'Nicolás Otamendi',pos:'DEF'},{num:5,nombre:'Lisandro Martínez',pos:'DEF'},{num:6,nombre:'Nicolás Tagliafico',pos:'DEF'},{num:7,nombre:'Leandro Paredes',pos:'MED'},{num:8,nombre:'Enzo Fernández',pos:'MED'},{num:9,nombre:'Alexis Mac Allister',pos:'MED'},{num:10,nombre:'Rodrigo De Paul',pos:'MED'},{num:11,nombre:'Julián Álvarez',pos:'DEL'},{num:12,nombre:'Lionel Messi',pos:'DEL'},{num:13,nombre:'Lautaro Martínez',pos:'DEL'}],
   'México':[{num:1,nombre:'Guillermo Ochoa',pos:'POR'},{num:2,nombre:'Jorge Sánchez',pos:'DEF'},{num:3,nombre:'César Montes',pos:'DEF'},{num:4,nombre:'Johan Vásquez',pos:'DEF'},{num:5,nombre:'Jesús Gallardo',pos:'DEF'},{num:6,nombre:'Edson Álvarez',pos:'MED'},{num:7,nombre:'Luis Chávez',pos:'MED'},{num:8,nombre:'Orbelín Pineda',pos:'MED'},{num:9,nombre:'Roberto Alvarado',pos:'DEL'},{num:10,nombre:'Santiago Giménez',pos:'DEL'},{num:11,nombre:'Raúl Jiménez',pos:'DEL'}]
@@ -830,11 +825,13 @@ function renderizarPartidoSimple(p){
 function renderEliminatorias(){
   const r32 = generarRonda32();
   
+  // Calcular ganadores de R32
   const ganadoresR32 = {};
   for(let p of r32){
     ganadoresR32[p.id] = getGanadorPartido(p);
   }
   
+  // Octavos según resultados de R32
   const octavos = [
     {id:'oct_89',f:'Sábado 4/7',l:ganadoresR32['r32_73'], v:ganadoresR32['r32_74'], e:'Estadio Filadelfia'},
     {id:'oct_90',f:'Sábado 4/7',l:ganadoresR32['r32_75'], v:ganadoresR32['r32_76'], e:'Estadio Houston'},
@@ -846,6 +843,7 @@ function renderEliminatorias(){
     {id:'oct_96',f:'Martes 7/7',l:ganadoresR32['r32_81'], v:ganadoresR32['r32_82'], e:'BC Place Vancouver'}
   ];
   
+  // Cuartos según resultados de OCTAVOS
   const ganadoresOct = {};
   for(let p of octavos){
     const res = RESULTADOS[p.id];
@@ -870,6 +868,7 @@ function renderEliminatorias(){
     {id:'cuar_100',f:'Sábado 11/7',l:ganadoresOct['oct_95'], v:ganadoresOct['oct_96'], e:'Estadio Kansas City'}
   ];
   
+  // Semis según resultados de CUARTOS
   const ganadoresCuar = {};
   for(let p of cuartos){
     const res = RESULTADOS[p.id];
@@ -892,6 +891,7 @@ function renderEliminatorias(){
     {id:'sem_102',f:'Miércoles 15/7',l:ganadoresCuar['cuar_99'], v:ganadoresCuar['cuar_100'], e:'Estadio Atlanta'}
   ];
   
+  // Final según resultados de SEMIS
   const ganadoresSem = {};
   for(let p of semis){
     const res = RESULTADOS[p.id];
@@ -911,6 +911,7 @@ function renderEliminatorias(){
   
   const final = {id:'final_104',f:'Domingo 19/7',l:ganadoresSem['sem_101'], v:ganadoresSem['sem_102'], e:'Estadio Nueva York Nueva Jersey'};
   
+  // Tercer puesto
   const perdedoresSem = {};
   for(let p of semis){
     if(ganadoresSem[p.id] === p.l) perdedoresSem[p.id] = p.v;
@@ -919,6 +920,7 @@ function renderEliminatorias(){
   }
   const tercerPuesto = {id:'ter_103',f:'Sábado 18/7',l:perdedoresSem['sem_101'], v:perdedoresSem['sem_102'], e:'Estadio Miami'};
   
+  // Renderizar
   let html = `<div class="eliminatorias-container">`;
   html += `<div class="ronda-card"><div class="ronda-title">🏆 RONDA DE 32 (Dieciseisavos)</div><div class="ronda-partidos">${r32.map(p=>renderizarPartidoElim(p)).join('')}</div></div>`;
   html += `<div class="ronda-card"><div class="ronda-title">🏆 OCTAVOS DE FINAL</div><div class="ronda-partidos">${octavos.map(p=>renderizarPartidoSimple(p)).join('')}</div></div>`;
@@ -957,6 +959,7 @@ function togglePenal(id, equipo, idx){
   renderEliminatorias();
 }
 
+// ==================== RENDER TODOS LOS GRUPOS ====================
 function renderTodosLosGrupos(){
   let tabsHtml = '', contenidoHtml = '';
   for(let g of gruposLista){
@@ -996,100 +999,6 @@ function cambiarSeccion(seccion){
   }
 }
 
-// ==================== FUNCIÓN PARA GUARDAR Y SINCRONIZAR ====================
-function guardarTodo() {
-  guardarTodoLocal();
-  if (typeof syncToFirebase === 'function') {
-    syncToFirebase();
-  }
-}
-
-// ==================== FIREBASE ====================
-const database = firebase.database();
-let isSavingToFirebase = false;
-let isLoadingFromFirebase = false;
-
-function updateSyncDisplay(status) {
-  const syncDiv = document.getElementById('syncStatus');
-  if (!syncDiv) return;
-  if (status === 'connected') {
-    syncDiv.innerHTML = '☁️ En la nube';
-    syncDiv.className = 'sync-status synced';
-  } else if (status === 'synced') {
-    syncDiv.innerHTML = '✅ Sincronizado';
-    syncDiv.className = 'sync-status synced';
-  } else if (status === 'syncing') {
-    syncDiv.innerHTML = '🔄 Sincronizando...';
-    syncDiv.className = 'sync-status syncing';
-  } else if (status === 'error') {
-    syncDiv.innerHTML = '📡 Sin conexión';
-    syncDiv.className = 'sync-status error';
-  }
-}
-
-function syncToFirebase() {
-  if (isLoadingFromFirebase || isSavingToFirebase) return;
-  isSavingToFirebase = true;
-  updateSyncDisplay('syncing');
-  
-  database.ref('mundial2026/resultados').set(RESULTADOS)
-    .then(() => {
-      updateSyncDisplay('synced');
-      isSavingToFirebase = false;
-    })
-    .catch((error) => {
-      console.error('Error al guardar:', error);
-      updateSyncDisplay('error');
-      isSavingToFirebase = false;
-    });
-}
-
-function loadFromFirebase() {
-  isLoadingFromFirebase = true;
-  updateSyncDisplay('syncing');
-  
-  database.ref('mundial2026/resultados').once('value')
-    .then((snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        RESULTADOS = data;
-        guardarTodoLocal();
-        renderTodosLosGrupos();
-        renderEliminatorias();
-        renderCalendario();
-      }
-      isLoadingFromFirebase = false;
-      updateSyncDisplay('connected');
-    })
-    .catch((error) => {
-      console.error('Error al cargar:', error);
-      isLoadingFromFirebase = false;
-      updateSyncDisplay('error');
-    });
-}
-
-database.ref('mundial2026/resultados').on('value', (snapshot) => {
-  if (isSavingToFirebase) return;
-  const data = snapshot.val();
-  if (data && JSON.stringify(data) !== JSON.stringify(RESULTADOS)) {
-    RESULTADOS = data;
-    guardarTodoLocal();
-    renderTodosLosGrupos();
-    renderEliminatorias();
-    renderCalendario();
-    updateSyncDisplay('synced');
-  }
-});
-
-database.ref('.info/connected').on('value', (snap) => {
-  if (snap.val() === true) {
-    loadFromFirebase();
-  } else {
-    updateSyncDisplay('error');
-  }
-});
-
-// Inicializar
 renderCalendario();
 renderTodosLosGrupos();
 </script>
