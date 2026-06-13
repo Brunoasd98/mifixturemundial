@@ -130,7 +130,16 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
   .partido-card{width:100%;}
   .dia-partidos-grid{grid-template-columns:1fr;}
 }
+
+/* ===== AGREGAR ESTO AL FINAL, ANTES DEL </style> ===== */
+.sync-status{font-size:.7rem;background:rgba(0,0,0,.5);padding:4px 10px;border-radius:20px;color:var(--muted);}
+.sync-status.synced{color:var(--green);}
+.sync-status.syncing{color:var(--gold);}
+.sync-status.error{color:var(--red);}
 </style>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
@@ -142,6 +151,7 @@ header{background:linear-gradient(135deg,var(--dark2),#0d0d1a);position:sticky;t
         <button class="reset-btn" onclick="resetFaseGrupos()">🗑️ RESET</button>
       </div>
     </div>
+    <div class="sync-status" id="syncStatus">🔄 Conectando...</div>
     <div class="tabs-principales">
       <button class="tab-principal" onclick="cambiarSeccion('inicio')">🏠 INICIO</button>
       <button class="tab-principal active" onclick="cambiarSeccion('grupos')">📋 FASE DE GRUPOS</button>
